@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>经典华容道</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #2c3e50, #1a1a2e);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            color: #fff;
+            touch-action: manipulation;
+        }
+        
+        .game-container {
+            position: relative;
+            width: 90vmin;
+            height: 160vmin;
+            max-width: 400px;
+            max-height: 700px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+        }
+        
+        .header {
+            width: 100%;
+            text-align: center;
+            padding: 15px 0;
+            margin-bottom: 15px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            text-shadow: 0 3px 6px rgba(0, 0, 0, 0.5);
+            background: linear-gradient(to right, #f9d423, #ff4e50);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+            letter-spacing: 2px;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            color: #e0e0e0;
+            margin-bottom: 10px;
+        }
+        
+        .game-info {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+        }
+        
+        .level, .moves {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .game-board {
+            width: 90vmin;
+            height: 90vmin;
+            max-width: 350px;
+            max-height: 350px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            position: relative;
+            display: grid;
+            grid-gap: 0;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+            border: 3px solid #5d4037;
+            overflow: hidden;
+        }
+        
+        .tile {
+            position: absolute;
+            background: linear-gradient(145deg, #8d6e63, #5d4037);
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #ffd700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            text-shadow: 0 2px 3px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 215, 0, 0.2);
+            z-index: 2;
+        }
+        
+        .tile.target {
+            background: linear-gradient(145deg, #d32f2f, #b71c1c);
+            color: #fff;
+            font-size: 1.8rem;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.4);
+        }
+        
+        .tile.horizontal {
+            background: linear-gradient(145deg, #0288d1, #01579b);
+        }
+        
+        .tile.vertical {
+            background: linear-gradient(145deg, #388e3c, #1b5e20);
+        }
+        
+        .tile.small {
+            background: linear-gradient(145deg, #f57c00, #e65100);
+            font-size: 1.4rem;
+        }
+        
+        .exit {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 33%;
+            height: 10px;
+            background: #4caf50;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            z-index: 1;
+        }
+        
+        .controls {
+            margin-top: 25px;
+            display: flex;
+            gap: 15px;
+        }
+        
+        button {
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            background: linear-gradient(145deg, #ff9800, #f57c00);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        button:active {
+            transform: scale(0.95);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+        
+        .overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .message {
+            font-size: 3.5rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.7);
+            animation: pulse 1.5s infinite;
+        }
+        
+        .win-message {
+            color: #4caf50;
+        }
+        
+        .level-up-message {
+            color: #ff9800;
+        }
+        
+        .level-info {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .instructions {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 1rem;
+            line-height: 1.6;
+            padding: 0 20px;
+            color: rgba(255, 255, 255, 0.8);
+            max-width: 90%;
+        }
+        
+        .footer {
+            position: absolute;
+            bottom: 15px;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+            text-align: center;
+            width: 100%;
+        }
+        
+        .tile-label {
+            font-size: 0.8rem;
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        @media (max-height: 700px) {
+            .game-container {
+                transform: scale(0.9);
+            }
+        }
+        
+        @media (max-height: 600px) {
+            .game-container {
+                transform: scale(0.8);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1>经典华容道</h1>
+            <div class="subtitle">移动方块，让红色方块从下方出口逃脱</div>
+            <div class="game-info">
+                <div class="level"><i class="fas fa-flag"></i> 关卡: <span id="level">1</span>/5</div>
+                <div class="moves"><i class="fas fa-shoe-prints"></i> 步数: <span id="moves">0</span></div>
+            </div>
+        </div>
+        
+        <div class="game-board" id="board">
+            <div class="exit"></div>
+            <!-- 方块将通过JS动态生成 -->
+        </div>
+        
+        <div class="controls">
+            <button id="reset"><i class="fas fa-redo"></i> 重新开始</button>
+            <button id="hint"><i class="fas fa-lightbulb"></i> 提示</button>
+        </div>
+        
+        <div class="instructions">
+            <i class="fas fa-info-circle"></i> 点击并滑动方块，为红色方块腾出通往出口的路径
+        </div>
+        
+        <div class="overlay" id="overlay">
+            <div class="message level-up-message" id="levelUpMessage">难度飙升!</div>
+            <div class="message win-message" id="winMessage">恭喜通关!</div>
+            <div class="level-info">下一关: <span id="nextLevelNum">2</span></div>
+            <button id="nextLevelBtn"><i class="fas fa-arrow-right"></i> 继续挑战</button>
+        </div>
+        
+        <div class="footer">
+            滑动方块进行游戏 | 经典华容道挑战
+        </div>
+    </div>
+
+    <script>
+        // 游戏配置
+        const config = {
+            levels: [
+                // 关卡1：简单布局
+                {
+                    size: { rows: 5, cols: 4 },
+                    tiles: [
+                        { id: 1, type: 'target', row: 0, col: 1, width: 2, height: 2 },
+                        { id: 2, type: 'vertical', row: 0, col: 0, width: 1, height: 2 },
+                        { id: 3, type: 'vertical', row: 0, col: 3, width: 1, height: 2 },
+                        { id: 4, type: 'horizontal', row: 2, col: 0, width: 2, height: 1 },
+                        { id: 5, type: 'horizontal', row: 2, col: 2, width: 2, height: 1 },
+                        { id: 6, type: 'small', row: 3, col: 1, width: 1, height: 1 },
+                        { id: 7, type: 'small', row: 3, col: 2, width: 1, height: 1 },
+                        { id: 8, type: 'vertical', row: 4, col: 0, width: 1, height: 1 },
+                        { id: 9, type: 'vertical', row: 4, col: 3, width: 1, height: 1 }
+                    ]
+                },
+                // 关卡2：增加难度
+                {
+                    size: { rows: 5, cols: 4 },
+                    tiles: [
+                        { id: 1, type: 'target', row: 0, col: 1, width: 2, height: 2 },
+                        { id: 2, type: 'vertical', row: 0, col: 0, width: 1, height: 2 },
+                        { id: 3, type: 'vertical', row: 0, col: 3, width: 1, height: 2 },
+                        { id: 4, type: 'horizontal', row: 2, col: 0, width: 1, height: 1 },
+                        { id: 5, type: 'horizontal', row: 2, col: 1, width: 2, height: 1 },
+                        { id: 6, type: 'horizontal', row: 2, col: 3, width: 1, height: 1 },
+                        { id: 7, type: 'vertical', row: 3, col: 0, width: 1, height: 2 },
+                        { id: 8, type: 'vertical', row: 3, col: 3, width: 1, height: 2 },
+                        { id: 9, type: 'small', row: 4, col: 1, width: 1, height: 1 },
+                        { id: 10, type: 'small', row: 4, col: 2, width: 1, height: 1 }
+                    ]
+                },
+                // 关卡3：中等难度
+                {
+                    size: { rows: 5, cols: 4 },
+                    tiles: [
+                        { id: 1, type: 'target', row: 0, col: 1, width: 2, height: 2 },
+                        { id: 2, type: 'vertical', row: 0, col: 0, width: 1, height: 2 },
+                        { id: 3, type: 'vertical', row: 0, col: 3, width: 1, height: 2 },
+                        { id: 4, type: 'horizontal', row: 2, col: 0, width: 2, height: 1 },
+                        { id: 5, type: 'horizontal', row: 2, col: 2, width: 2, height: 1 },
+                        { id: 6, type: 'vertical', row: 3, col: 0, width: 1, height: 2 },
+                        { id: 7, type: 'vertical', row: 3, col: 1, width: 1, height: 2 },
+                        { id: 8, type: 'vertical', row: 3, col: 2, width: 1, height: 2 },
+                        { id: 9, type: 'vertical', row: 3, col: 3, width: 1, height: 2 },
+                        { id: 10, type: 'small', row: 4, col: 1, width: 1, height: 1 }
+                    ]
+                },
+                // 关卡4：复杂布局
+                {
+                    size: { rows: 5, cols: 4 },
+                    tiles: [
+                        { id: 1, type: 'target', row: 1, col: 1, width: 2, height: 2 },
+                        { id: 2, type: 'horizontal', row: 0, col: 0, width: 1, height: 1 },
+                        { id: 3, type: 'horizontal', row: 0, col: 1, width: 2, height: 1 },
+                        { id: 4, type: 'horizontal', row: 0, col: 3, width: 1, height: 1 },
+                        { id: 5, type: 'vertical', row: 1, col: 0, width: 1, height: 2 },
+                        { id: 6, type: 'vertical', row: 1, col: 3, width: 1, height: 2 },
+                        { id: 7, type: 'horizontal', row: 3, col: 0, width: 1, height: 1 },
+                        { id: 8, type: 'horizontal', row: 3, col: 1, width: 1, height: 1 },
+                        { id: 9, type: 'horizontal', row: 3, col: 2, width: 1, height: 1 },
+                        { id: 10, type: 'horizontal', row: 3, col: 3, width: 1, height: 1 },
+                        { id: 11, type: 'vertical', row: 4, col: 0, width: 1, height: 1 },
+                        { id: 12, type: 'vertical', row: 4, col: 3, width: 1, height: 1 }
+                    ]
+                },
+                // 关卡5：专家难度
+                {
+                    size: { rows: 5, cols: 4 },
+                    tiles: [
+                        { id: 1, type: 'target', row: 0, col: 1, width: 2, height: 2 },
+                        { id: 2, type: 'vertical', row: 0, col: 0, width: 1, height: 2 },
+                        { id: 3, type: 'vertical', row: 0, col: 3, width: 1, height: 2 },
+                        { id: 4, type: 'vertical', row: 2, col: 0, width: 1, height: 2 },
+                        { id: 5, type: 'vertical', row: 2, col: 3, width: 1, height: 2 },
+                        { id: 6, type: 'horizontal', row: 2, col: 1, width: 2, height: 1 },
+                        { id: 7, type: 'horizontal', row: 3, col: 1, width: 1, height: 1 },
+                        { id: 8, type: 'horizontal', row: 3, col: 2, width: 1, height: 1 },
+                        { id: 9, type: 'small', row: 4, col: 0, width: 1, height: 1 },
+                        { id: 10, type: 'small', row: 4, col: 1, width: 1, height: 1 },
+                        { id: 11, type: 'small', row: 4, col: 2, width: 1, height: 1 },
+                        { id: 12, type: 'small', row: 4, col: 3, width: 1, height: 1 }
+                    ]
+                }
+            ],
+            currentLevel: 0,
+            moves: 0,
+            board: [],
+            tileSize: 0,
+            selectedTile: null,
+            gameOver: false
+        };
+
+        // DOM元素
+        const boardEl = document.getElementById('board');
+        const levelEl = document.getElementById('level');
+        const movesEl = document.getElementById('moves');
+        const resetBtn = document.getElementById('reset');
+        const hintBtn = document.getElementById('hint');
+        const overlay = document.getElementById('overlay');
+        const levelUpMessage = document.getElementById('levelUpMessage');
+        const winMessage = document.getElementById('winMessage');
+        const nextLevelBtn = document.getElementById('nextLevelBtn');
+        const nextLevelNum = document.getElementById('nextLevelNum');
+
+        // 初始化游戏
+        function initGame() {
+            config.currentLevel = 0;
+            config.moves = 0;
+            movesEl.textContent = '0';
+            levelEl.textContent = '1';
+            createBoard();
+        }
+
+        // 创建游戏板
+        function createBoard() {
+            const level = config.levels[config.currentLevel];
+            const { rows, cols } = level.size;
+            
+            // 清空棋盘
+            boardEl.innerHTML = '';
+            boardEl.appendChild(document.createElement('div')); // 添加出口
+            
+            // 计算方块大小
+            const boardWidth = boardEl.offsetWidth;
+            const boardHeight = boardEl.offsetHeight;
+            config.tileSize = Math.min(boardWidth / cols, boardHeight / rows);
+            
+            // 创建出口
+            const exit = document.createElement('div');
+            exit.className = 'exit';
+            boardEl.appendChild(exit);
+            
+            // 创建方块
+            level.tiles.forEach(tileConfig => {
+                const tile = createTile(tileConfig);
+                boardEl.appendChild(tile);
+            });
+            
+            config.moves = 0;
+            movesEl.textContent = '0';
+            config.gameOver = false;
+        }
+
+        // 创建方块元素
+        function createTile(tileConfig) {
+            const tile = document.createElement('div');
+            tile.className = `tile ${tileConfig.type}`;
+            tile.dataset.id = tileConfig.id;
+            tile.dataset.row = tileConfig.row;
+            tile.dataset.col = tileConfig.col;
+            tile.dataset.width = tileConfig.width;
+            tile.dataset.height = tileConfig.height;
+            
+            // 设置方块位置和大小
+            tile.style.width = `${tileConfig.width * config.tileSize}px`;
+            tile.style.height = `${tileConfig.height * config.tileSize}px`;
+            tile.style.top = `${tileConfig.row * config.tileSize}px`;
+            tile.style.left = `${tileConfig.col * config.tileSize}px`;
+            
+            // 添加方块标签
+            const label = document.createElement('div');
+            label.className = 'tile-label';
+            label.textContent = `${tileConfig.width}x${tileConfig.height}`;
+            tile.appendChild(label);
+            
+            // 添加触摸事件
+            tile.addEventListener('touchstart', handleTouchStart);
+            tile.addEventListener('touchmove', handleTouchMove);
+            tile.addEventListener('touchend', handleTouchEnd);
+            tile.addEventListener('mousedown', handleMouseDown);
+            
+            return tile;
+        }
+
+        // 触摸事件处理
+        let touchStartX, touchStartY, touchStartTime;
+        
+        function handleTouchStart(e) {
+            if (config.gameOver) return;
+            
+            const tile = e.target.closest('.tile');
+            if (!tile) return;
+            
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+            touchStartTime = Date.now();
+            
+            config.selectedTile = tile;
+            tile.style.zIndex = '3';
+            tile.style.boxShadow = '0 0 20px rgba(255, 255, 0, 0.7)';
+            
+            e.preventDefault();
+        }
+        
+        function handleTouchMove(e) {
+            if (!config.selectedTile) return;
+            
+            e.preventDefault();
+        }
+        
+        function handleTouchEnd(e) {
+            if (!config.selectedTile) return;
+            
+            const tile = config.selectedTile;
+            const touchEndX = e.changedTouches[0].clientX;
+            const touchEndY = e.changedTouches[0].clientY;
+            const elapsedTime = Date.now() - touchStartTime;
+            
+            const diffX = touchEndX - touchStartX;
+            const diffY = touchEndY - touchStartY;
+            
+            // 确定滑动方向
+            if (elapsedTime < 500 && (Math.abs(diffX) > 10 || Math.abs(diffY) > 10)) {
+                const direction = 
+                    Math.abs(diffX) > Math.abs(diffY) ? 
+                    (diffX > 0 ? 'right' : 'left') : 
+                    (diffY > 0 ? 'down' : 'up');
+                
+                moveTile(tile, direction);
+            }
+            
+            tile.style.zIndex = '2';
+            tile.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.3)';
+            config.selectedTile = null;
+            
+            e.preventDefault();
+        }
+        
+        // 鼠标事件处理
+        function handleMouseDown(e) {
+            if (config.gameOver) return;
+            
+            const tile = e.target.closest('.tile');
+            if (!tile) return;
+            
+            config.selectedTile = tile;
+            tile.style.zIndex = '3';
+            tile.style.boxShadow = '0 0 20px rgba(255, 255, 0, 0.7)';
+            
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseUp);
+        }
+        
+        function handleMouseMove(e) {
+            // 在鼠标拖动时不执行操作
+        }
+        
+        function handleMouseUp(e) {
+            if (!config.selectedTile) return;
+            
+            const tile = config.selectedTile;
+            const rect = tile.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            const diffX = e.clientX - centerX;
+            const diffY = e.clientY - centerY;
+            
+            // 确定移动方向
+            if (Math.abs(diffX) > 10 || Math.abs(diffY) > 10) {
+                const direction = 
+                    Math.abs(diffX) > Math.abs(diffY) ? 
+                    (diffX > 0 ? 'right' : 'left') : 
+                    (diffY > 0 ? 'down' : 'up');
+                
+                moveTile(tile, direction);
+            }
+            
+            tile.style.zIndex = '2';
+            tile.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.3)';
+            config.selectedTile = null;
+            
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+        }
+        
+        // 移动方块
+        function moveTile(tile, direction) {
+            const id = parseInt(tile.dataset.id);
+            const row = parseInt(tile.dataset.row);
+            const col = parseInt(tile.dataset.col);
+            const width = parseInt(tile.dataset.width);
+            const height = parseInt(tile.dataset.height);
+            
+            let newRow = row;
+            let newCol = col;
+            
+            // 计算新位置
+            switch(direction) {
+                case 'up': newRow--; break;
+                case 'down': newRow++; break;
+                case 'left': newCol--; break;
+                case 'right': newCol++; break;
+            }
+            
+            // 检查新位置是否有效
+            if (isPositionValid(id, newRow, newCol, width, height)) {
+                // 更新方块位置
+                tile.dataset.row = newRow;
+                tile.dataset.col = newCol;
+                tile.style.top = `${newRow * config.tileSize}px`;
+                tile.style.left = `${newCol * config.tileSize}px`;
+                
+                // 更新移动计数
+                config.moves++;
+                movesEl.textContent = config.moves;
+                
+                // 检查是否获胜
+                if (tile.classList.contains('target')) {
+                    const boardHeight = boardEl.offsetHeight;
+                    const tileBottom = (newRow + height) * config.tileSize;
+                    
+                    // 检查是否到达出口
+                    if (tileBottom >= boardHeight) {
+                        config.gameOver = true;
+                        if (config.currentLevel === config.levels.length - 1) {
+                            showWinScreen();
+                        } else {
+                            showLevelUpScreen();
+                        }
+                    }
+                }
+            }
+        }
+        
+        // 检查位置是否有效
+        function isPositionValid(id, row, col, width, height) {
+            const level = config.levels[config.currentLevel];
+            const boardRows = level.size.rows;
+            const boardCols = level.size.cols;
+            
+            // 检查边界
+            if (row < 0 || col < 0 || row + height > boardRows || col + width > boardCols) {
+                return false;
+            }
+            
+            // 检查与其他方块的碰撞
+            const tiles = boardEl.querySelectorAll('.tile');
+            for (const tile of tiles) {
+                if (parseInt(tile.dataset.id) === id) continue;
+                
+                const tRow = parseInt(tile.dataset.row);
+                const tCol = parseInt(tile.dataset.col);
+                const tWidth = parseInt(tile.dataset.width);
+                const tHeight = parseInt(tile.dataset.height);
+                
+                // 检查碰撞
+                if (!(col + width <= tCol || col >= tCol + tWidth || row + height <= tRow || row >= tRow + tHeight)) {
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+        
+        // 显示关卡提升画面
+        function showLevelUpScreen() {
+            levelUpMessage.style.display = 'block';
+            winMessage.style.display = 'none';
+            nextLevelNum.textContent = config.currentLevel + 2;
+            overlay.classList.add('active');
+            
+            setTimeout(() => {
+                nextLevel();
+            }, 2000);
+        }
+        
+        // 显示胜利画面
+        function showWinScreen() {
+            levelUpMessage.style.display = 'none';
+            winMessage.style.display = 'block';
+            nextLevelBtn.textContent = '重新开始';
+            overlay.classList.add('active');
+        }
+        
+        // 进入下一关
+        function nextLevel() {
+            if (config.currentLevel < config.levels.length - 1) {
+                config.currentLevel++;
+                levelEl.textContent = config.currentLevel + 1;
+                overlay.classList.remove('active');
+                createBoard();
+            } else {
+                // 重新开始游戏
+                overlay.classList.remove('active');
+                initGame();
+            }
+        }
+        
+        // 提示功能
+        function showHint() {
+            alert('提示：尝试先移动小方块，为红色方块创造移动空间！');
+        }
+        
+        // 事件监听
+        resetBtn.addEventListener('click', initGame);
+        hintBtn.addEventListener('click', showHint);
+        nextLevelBtn.addEventListener('click', nextLevel);
+
+        // 初始化游戏
+        window.addEventListener('load', () => {
+            initGame();
+            
+            // 添加一些动画效果
+            const tiles = document.querySelectorAll('.tile');
+            tiles.forEach((tile, index) => {
+                setTimeout(() => {
+                    tile.style.transform = 'scale(1)';
+                    tile.style.opacity = '1';
+                }, 100 + index * 50);
+            });
+        });
+    </script>
+</body>
+</html>
